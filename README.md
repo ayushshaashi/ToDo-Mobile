@@ -1,50 +1,87 @@
-# Welcome to your Expo app 👋
+# TodoApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native task management application built with Expo Router and Firebase. This app allows users to manage their tasks efficiently with real-time syncing, filtering, sorting, and user authentication.
 
-## Get started
+## Features
 
-1. Install dependencies
+- User authentication with Firebase
+- Real-time task syncing with Firestore database
+- Add, edit, and delete tasks
+- Filter tasks by priority (low, medium, high) and status (completed, incomplete)
+- Sort tasks by due date, priority, or status
+- Responsive and intuitive UI with a sidebar for profile and logout
+- Toast notifications for user feedback
+
+## Technologies Used
+
+- React Native
+- Expo Router
+- Firebase Authentication & Firestore
+- React Native Safe Area Context
+- Sonner-native for toast notifications
+- Expo Vector Icons
+- React Native Community DateTimePicker
+- TypeScript
+
+## Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone <repository-url>
+   cd todoApp/todoApp
+   ```
+
+2. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the Expo development server:
 
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+4. Use the Expo Go app on your mobile device or an emulator to run the app.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Usage
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Register or log in to your account.
+- Add new tasks with title, description, due date, priority, and status.
+- Edit or delete existing tasks.
+- Use filters to view tasks by priority or completion status.
+- Sort tasks by due date, priority, or status.
+- Access the sidebar to view your profile or log out.
 
-## Get a fresh project
+## Folder Structure
 
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+todoApp/
+├── app/
+│   ├── screens/           # Screen components (Home, Tasks, Profile, Register, etc.)
+│   ├── home.tsx           # Main entry point exporting HomeScreen
+│   ├── index.tsx          # App entry point
+│   └── ...                # Other app-level components and screens
+├── components/            # Reusable UI components (TaskCard, TaskForm, Header, FilterBar)
+├── constants/             # Color and font constants
+├── hooks/                 # Custom hooks (useColorScheme, useThemeColor)
+├── assets/                # Images, icons, fonts
+├── scripts/               # Utility scripts (e.g., updateTasksUserId.js)
+├── app.json               # Expo configuration
+├── package.json           # Project dependencies and scripts
+└── README.md              # This file
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## License
 
-## Learn more
+This project is licensed under the MIT License.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Author
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Ayush Shashi
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Thank you for using TodoApp! Stay organized and productive.
