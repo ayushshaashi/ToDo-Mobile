@@ -86,4 +86,9 @@ Ayush Shashi
 
 ---
 
+## Design
+
+The custom-made design for this app is available on Figma:  
+[View the Figma Design](https://www.figma.com/design/cWcd36uJfLzMVJBWHu9Nf0/Untitled?node-id=0-1&t=u30VSCjLd5lqR56y-1)
+
 Thank you for using TodoApp! Stay organized and productive.
