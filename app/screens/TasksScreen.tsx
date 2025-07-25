@@ -23,6 +23,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 import { auth, db } from "./../../firebaseConfig";
 
+import * as Notifications from "expo-notifications";
+
 import TaskCard from "../../components/TaskCard";
 import TaskForm from "../../components/TaskForm";
 
@@ -39,6 +41,7 @@ interface Task {
   dueDate: Date;
   priority: Priority;
   isCompleted: boolean;
+  notificationId?: string | null;
 }
 
 export default function TasksScreen() {
@@ -56,53 +59,75 @@ export default function TasksScreen() {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    console.log("Current user uid:", user?.uid);
-    if (!user) {
-      toast.error("Not logged in", {
-        description: "Please log in to view your tasks",
-      });
-      router.replace("/");
-      return;
-    }
+    (async () => {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
 
-    const tasksQuery = query(
-      collection(db, "users", user.uid, "tasks"),
-      orderBy("dueDate", "asc")
-    );
-
-    const unsubscribe = onSnapshot(
-      tasksQuery,
-      (querySnapshot) => {
-        console.log("onSnapshot triggered, doc count:", querySnapshot.size);
-        const loadedTasks: Task[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          loadedTasks.push({
-            id: doc.id,
-            title: data.title,
-            description: data.description,
-            dueDate: data.dueDate.toDate
-              ? data.dueDate.toDate()
-              : new Date(data.dueDate),
-            priority: data.priority,
-            isCompleted: data.isCompleted,
-          });
-        });
-        console.log("Real-time loaded tasks:", loadedTasks);
-        setTasks(loadedTasks);
-        setFilteredTasks(loadedTasks);
-        setIsLoading(false);
-      },
-      (error) => {
-        toast.error("Failed to load tasks", {
-          description: "Please try again later",
-        });
-        setIsLoading(false);
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
       }
-    );
 
-    return () => unsubscribe();
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+
+      // FIX: Removed `experienceId`
+      const token = (await Notifications.getExpoPushTokenAsync()).data;
+
+      console.log(token);
+
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("Not logged in", {
+          description: "Please log in to view your tasks",
+        });
+        router.replace("/");
+        return;
+      }
+
+      // OPTIONAL: store token in Firestore if needed
+      // await updatePushToken(user.uid, token.data);
+
+      const tasksQuery = query(
+        collection(db, "users", user.uid, "tasks"),
+        orderBy("dueDate", "asc")
+      );
+
+      const unsubscribe = onSnapshot(
+        tasksQuery,
+        (querySnapshot) => {
+          const loadedTasks: Task[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            loadedTasks.push({
+              id: doc.id,
+              title: data.title,
+              description: data.description,
+              dueDate: data.dueDate.toDate
+                ? data.dueDate.toDate()
+                : new Date(data.dueDate),
+              priority: data.priority,
+              isCompleted: data.isCompleted,
+              notificationId: data.notificationId || null,
+            });
+          });
+          setTasks(loadedTasks);
+          setFilteredTasks(loadedTasks);
+          setIsLoading(false);
+        },
+        (error) => {
+          toast.error("Failed to load tasks", {
+            description: "Please try again later",
+          });
+          setIsLoading(false);
+        }
+      );
+
+      return () => unsubscribe();
+    })();
   }, []);
 
   useEffect(() => {
@@ -196,11 +221,19 @@ export default function TasksScreen() {
     const updatedStatus = !taskToUpdate.isCompleted;
 
     try {
+      if (updatedStatus && taskToUpdate.notificationId) {
+        // Cancel scheduled notification if task is marked complete
+        await Notifications.cancelScheduledNotificationAsync(
+          taskToUpdate.notificationId
+        );
+      }
+
       await setDoc(
         doc(db, "users", user.uid, "tasks", id),
         {
           ...taskToUpdate,
           isCompleted: updatedStatus,
+          notificationId: updatedStatus ? null : taskToUpdate.notificationId,
         },
         { merge: true }
       );
@@ -252,7 +285,29 @@ export default function TasksScreen() {
           collection(db, "users", user.uid, "tasks"),
           taskData
         );
-        await setDoc(docRef, { ...taskData, id: docRef.id });
+
+        // Schedule notification 1 minute after creation
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Task Reminder",
+            body: `Time to complete: ${task.title}`,
+            sound: true,
+            priority: Notifications.AndroidNotificationPriority.HIGH,
+          },
+          trigger: {
+            type: "timeInterval", // 👈 required field
+            seconds: 10, // e.g., 10 seconds later
+            repeats: false,
+          } as any,
+        });
+
+        // Save notificationId in Firestore
+        await setDoc(doc(db, "users", user.uid, "tasks", docRef.id), {
+          ...taskData,
+          id: docRef.id,
+          notificationId,
+        });
+
         toast.success("Task created", {
           description: "Task added successfully",
         });

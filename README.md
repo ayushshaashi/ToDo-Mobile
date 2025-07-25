@@ -1,6 +1,6 @@
 # TodoApp
 
-A React Native task management application built with Expo Router and Firebase. This app allows users to manage their tasks efficiently with real-time syncing, filtering, sorting, and user authentication.
+A React Native task management application built with Expo Router and Firebase. This app allows users to efficiently manage their tasks with real-time syncing, filtering, sorting, and user authentication.
 
 ## Features
 
@@ -11,6 +11,7 @@ A React Native task management application built with Expo Router and Firebase. 
 - Sort tasks by due date, priority, or status
 - Responsive and intuitive UI with a sidebar for profile and logout
 - Toast notifications for user feedback
+- Push notifications for task reminders
 
 ## Technologies Used
 
@@ -69,6 +70,7 @@ todoApp/
 ├── hooks/                 # Custom hooks (useColorScheme, useThemeColor)
 ├── assets/                # Images, icons, fonts
 ├── scripts/               # Utility scripts (e.g., updateTasksUserId.js)
+├── android/               # Android native project files
 ├── app.json               # Expo configuration
 ├── package.json           # Project dependencies and scripts
 └── README.md              # This file
